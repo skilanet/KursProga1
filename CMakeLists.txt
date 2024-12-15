@@ -7,4 +7,5 @@ set(CMAKE_OSX_ARCHITECTURES "arm64")
 add_executable(KursProga1 main.cpp
         Tree.h
         Nodes.h
+        Menu.h
 )

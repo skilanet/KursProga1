@@ -1,5 +1,7 @@
 #include <fstream>
 #include <iostream>
+
+#include "Benchmark.h"
 #include "Menu.h"
 
 int main() {

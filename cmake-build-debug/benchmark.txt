@@ -1,0 +1,21 @@
+Elements: 5
+	Operation - Insert:  Mean (ms): 0.00224167; MSE (ms): 0.000929451
+	Operation - Sorting:  Mean (ms): 0.0085528; MSE (ms): 0.00193036
+	Operation - Removing by element:  Mean (ms): 0.0174167; MSE (ms): 0.00750385
+	Operation - Removing by index:  Mean (ms): 0.0667138; MSE (ms): 0.156788
+	Operation - Getting by index:  Mean (ms): 0.0134113; MSE (ms): 0.00085097
+	Operation - Traversal:  Mean (ms): 0.00451367; MSE (ms): 0.000387412
+Elements: 50
+	Operation - Insert:  Mean (ms): 0.191756; MSE (ms): 0.00582477
+	Operation - Sorting:  Mean (ms): 0.201333; MSE (ms): 0.0235497
+	Operation - Removing by element:  Mean (ms): 0.183708; MSE (ms): 0.0886474
+	Operation - Removing by index:  Mean (ms): 1.74931; MSE (ms): 5.27169
+	Operation - Getting by index:  Mean (ms): 0.0329888; MSE (ms): 0.00345547
+	Operation - Traversal:  Mean (ms): 0.0237304; MSE (ms): 0.00504951
+Elements: 500
+	Operation - Insert:  Mean (ms): 2.17224; MSE (ms): 0.216383
+	Operation - Sorting:  Mean (ms): 1.90269; MSE (ms): 0.0354995
+	Operation - Removing by element:  Mean (ms): 0.144203; MSE (ms): 0.0493515
+	Operation - Removing by index:  Mean (ms): 5.70456; MSE (ms): 0.0647072
+	Operation - Getting by index:  Mean (ms): 0.134847; MSE (ms): 0.00101073
+	Operation - Traversal:  Mean (ms): 0.134444; MSE (ms): 0.00142767

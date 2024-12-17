@@ -8,4 +8,5 @@ add_executable(KursProga1 main.cpp
         Tree.h
         Nodes.h
         Menu.h
+        Benchmark.h
 )

@@ -18,8 +18,6 @@ class Tree final {
 
     bool insert_helper(std::shared_ptr<TreeNode> &node, const T &element);
 
-    std::shared_ptr<TreeNode> build_balanced_tree(const std::vector<T> &elements, int start, int end);
-
     std::vector<T> get_all_elements();
 
     /**
@@ -83,7 +81,7 @@ public:
     Tree(): root(nullptr) {
     }
 
-    void in_order_traversal();
+    void in_order_traversal(bool);
 
     ~Tree() = default;
 
@@ -102,8 +100,6 @@ public:
     void save_to_binary_file(std::ofstream &ofs);
 
     void load_from_binary_file(std::ifstream &ifs);
-
-    std::string to_string();
 
     void print_helper();
 
@@ -333,14 +329,16 @@ void Tree<T, arr_size>::balance_intermediate(std::shared_ptr<IntermediateNode<T,
  * Функция для вывода значений дерева при проходе 'в ширину'
  */
 template<typename T, int arr_size>
-void Tree<T, arr_size>::in_order_traversal() {
+void Tree<T, arr_size>::in_order_traversal(bool is_need_to_print) {
     traverse(root, [&](const std::shared_ptr<TreeNode> &node) {
         if (node->get_type() == TYPE::LEAF) {
             auto leaf = std::dynamic_pointer_cast<LeafNode<T, arr_size> >(node);
             std::vector<T> elements;
             leaf->get_all_elements(elements);
-            for (auto &element: elements) {
-                std::cout << element << " ";
+            if (is_need_to_print) {
+                for (auto &element: elements) {
+                    std::cout << element << " ";
+                }
             }
         }
     });
@@ -417,7 +415,10 @@ void Tree<T, arr_size>::load_from_binary_file(std::ifstream &ifs) {
  */
 template<typename T, int arr_size>
 void Tree<T, arr_size>::print_helper() {
-    if (!root) return;
+    if (!root) {
+        std::cout << "Empty Tree" << std::endl;
+        return;
+    }
 
     std::queue<std::shared_ptr<TreeNode> > queue;
     queue.push(root);

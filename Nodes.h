@@ -1,5 +1,4 @@
 #pragma once
-#include <iostream>
 #include <sstream>
 
 /**
@@ -93,9 +92,11 @@ class IntermediateNode final : public TreeNode {
 public:
     void get_all_elements(std::vector<T> &elements);
 
-    void set_actual_size(size_t actual_size) {
-        this->actual_size = actual_size;
-    }
+    TYPE get_type() override { return TYPE::INTERMEDIATE; }
+
+    explicit IntermediateNode(): left_node(nullptr), right_node(nullptr), actual_size(-1) {}
+
+    std::string to_string() override;
 
     size_t get_size() override {
         const size_t left_size = left_node ? left_node->get_size() : 0;
@@ -103,7 +104,7 @@ public:
         return left_size + right_size;
     }
 
-    TYPE get_type() override { return TYPE::INTERMEDIATE; }
+    explicit operator std::string() override { return to_string(); }
 
     std::shared_ptr<TreeNode> &get_left_node();
 
@@ -112,15 +113,6 @@ public:
     bool set_left_node(const std::shared_ptr<TreeNode> &new_left_node);
 
     bool set_right_node(const std::shared_ptr<TreeNode> &new_right_node);
-
-    explicit IntermediateNode(): left_node(nullptr), right_node(nullptr), actual_size(-1) {
-    }
-
-    ~IntermediateNode() override = default;
-
-    std::string to_string() override;
-
-    explicit operator std::string() override { return to_string(); }
 };
 
 /**
@@ -129,7 +121,7 @@ public:
 template<typename T, size_t arr_size>
 std::string IntermediateNode<T, arr_size>::to_string() {
     std::ostringstream os;
-    os << "IntermediateNode {actual_size - " + std::to_string(actual_size) + "}: left - (";
+    os << "IntermediateNode left - (";
     if (left_node) {
         os << left_node.get();
     } else {

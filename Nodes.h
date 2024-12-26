@@ -6,7 +6,7 @@
  *
  * TYPE - класс для типа вершины
  *
- * TreeNode - абстрактный класс вершины
+ * TreeNode<T> - абстрактный класс вершины
  *
  * LeafNode - класс конечной вершины
  *
@@ -16,8 +16,9 @@ enum class TYPE { LEAF, INTERMEDIATE };
 
 
 /**
- * Класс TreeNode является интерфейсом, он позволяет использовать полиморфизм для лучшего управления поддеревьями
+ * Класс TreeNode<T> является интерфейсом, он позволяет использовать полиморфизм для лучшего управления поддеревьями
  */
+template<typename T>
 class TreeNode {
 public:
     virtual ~TreeNode() = default;
@@ -29,6 +30,8 @@ public:
     virtual size_t get_size() = 0;
 
     virtual explicit operator std::string() = 0;
+
+    virtual T get_max_value() = 0;
 };
 
 /**
@@ -39,7 +42,7 @@ public:
  * при инициализации создаётся умный указатель на массив с данными и последний элемент становиться NULL
  */
 template<typename T, size_t arr_size>
-class LeafNode final : public TreeNode {
+class LeafNode final : public TreeNode<T> {
     std::unique_ptr<T[]> data;
     size_t actual_size = 0;
 
@@ -70,7 +73,27 @@ public:
             throw std::out_of_range("index out of range");
         }
         return data[index];
-    };
+    }
+
+    void add_elements(std::vector<T> elements) {
+        for (auto element : elements) {
+            add_element(element);
+        }
+    }
+
+    bool insert_by_index(size_t index, T element);
+
+    bool remove_by_index(size_t index);
+
+    bool clear_elements();
+
+    std::vector<T> get_data() {
+        std::vector<T> elements;
+        get_all_elements(elements);
+        return elements;
+    }
+
+    T get_max_value() override { return data[actual_size - 1]; }
 };
 
 /**
@@ -78,23 +101,23 @@ public:
  * @tparam T используется для задания типа данных массива (нужна для корректного создания LeafNode)
  * @tparam arr_size используется для задания размера массива на этапе компиляции (нужна для корректного создания LeafNode)
  *
- * @param left_node указатель на левое поддерево, используется умный указатель, а так же тип TreeNode
- * @param right_node указатель на правое поддерево, используется умный указатель, а так же тип TreeNode
+ * @param left_node указатель на левое поддерево, используется умный указатель, а так же тип TreeNode<T>
+ * @param right_node указатель на правое поддерево, используется умный указатель, а так же тип TreeNode<T>
  *
  * при инициализации указатели на поддеревья по-умолчанию имеют тип nullptr
  */
 template<typename T, size_t arr_size>
-class IntermediateNode final : public TreeNode {
-    std::shared_ptr<TreeNode> left_node;
-    std::shared_ptr<TreeNode> right_node;
-    size_t actual_size = 0;
+class IntermediateNode final : public TreeNode<T> {
+    std::shared_ptr<TreeNode<T>> left_node;
+    std::shared_ptr<TreeNode<T>> right_node;
 
 public:
     void get_all_elements(std::vector<T> &elements);
 
     TYPE get_type() override { return TYPE::INTERMEDIATE; }
 
-    explicit IntermediateNode(): left_node(nullptr), right_node(nullptr), actual_size(-1) {}
+    explicit IntermediateNode(): left_node(nullptr), right_node(nullptr) {
+    }
 
     std::string to_string() override;
 
@@ -106,13 +129,19 @@ public:
 
     explicit operator std::string() override { return to_string(); }
 
-    std::shared_ptr<TreeNode> &get_left_node();
+    std::shared_ptr<TreeNode<T>> &get_left_node();
 
-    std::shared_ptr<TreeNode> &get_right_node();
+    std::shared_ptr<TreeNode<T>> &get_right_node();
 
-    bool set_left_node(const std::shared_ptr<TreeNode> &new_left_node);
+    bool set_left_node(const std::shared_ptr<TreeNode<T>> &new_left_node);
 
-    bool set_right_node(const std::shared_ptr<TreeNode> &new_right_node);
+    bool set_right_node(const std::shared_ptr<TreeNode<T>> &new_right_node);
+
+    T get_max_value() override {
+        if (left_node && right_node) {
+            return std::max(left_node->get_max_value(), right_node->get_max_value());
+        }
+    };
 };
 
 /**
@@ -148,14 +177,14 @@ void IntermediateNode<T, arr_size>::get_all_elements(std::vector<T> &elements) {
         if (left_node->get_type() == TYPE::INTERMEDIATE) {
             std::dynamic_pointer_cast<IntermediateNode>(left_node)->get_all_elements(elements);
         } else {
-            std::dynamic_pointer_cast<LeafNode<T, arr_size>>(left_node)->get_all_elements(elements);
+            std::dynamic_pointer_cast<LeafNode<T, arr_size> >(left_node)->get_all_elements(elements);
         }
     }
     if (right_node || right_node->get_type() == TYPE::INTERMEDIATE) {
         if (right_node->get_type() == TYPE::INTERMEDIATE) {
             std::dynamic_pointer_cast<IntermediateNode>(right_node)->get_all_elements(elements);
         } else {
-            std::dynamic_pointer_cast<LeafNode<T, arr_size>>(right_node)->get_all_elements(elements);
+            std::dynamic_pointer_cast<LeafNode<T, arr_size> >(right_node)->get_all_elements(elements);
         }
     }
 }
@@ -165,7 +194,7 @@ void IntermediateNode<T, arr_size>::get_all_elements(std::vector<T> &elements) {
  * @return Функция возвращает указатель на левое поддерево
  */
 template<typename T, size_t arr_size>
-std::shared_ptr<TreeNode> &IntermediateNode<T, arr_size>::get_left_node() {
+std::shared_ptr<TreeNode<T>> &IntermediateNode<T, arr_size>::get_left_node() {
     return left_node;
 }
 
@@ -174,7 +203,7 @@ std::shared_ptr<TreeNode> &IntermediateNode<T, arr_size>::get_left_node() {
  * @return Функция возвращает указатель на правое поддерево
  */
 template<typename T, size_t arr_size>
-std::shared_ptr<TreeNode> &IntermediateNode<T, arr_size>::get_right_node() {
+std::shared_ptr<TreeNode<T>> &IntermediateNode<T, arr_size>::get_right_node() {
     return right_node;
 }
 
@@ -185,8 +214,8 @@ std::shared_ptr<TreeNode> &IntermediateNode<T, arr_size>::get_right_node() {
  * @return false - если возникли ошибки
  */
 template<typename T, size_t arr_size>
-bool IntermediateNode<T, arr_size>::set_left_node(const std::shared_ptr<TreeNode> &new_left_node) {
-    left_node = std::dynamic_pointer_cast<TreeNode>(new_left_node);
+bool IntermediateNode<T, arr_size>::set_left_node(const std::shared_ptr<TreeNode<T>> &new_left_node) {
+    left_node = std::dynamic_pointer_cast<TreeNode<T>>(new_left_node);
     return left_node != nullptr && left_node->get_type() == TYPE::INTERMEDIATE;
 }
 
@@ -197,11 +226,10 @@ bool IntermediateNode<T, arr_size>::set_left_node(const std::shared_ptr<TreeNode
  * @return false - если возникли ошибки
  */
 template<typename T, size_t arr_size>
-bool IntermediateNode<T, arr_size>::set_right_node(const std::shared_ptr<TreeNode> &new_right_node) {
-    right_node = std::dynamic_pointer_cast<TreeNode>(new_right_node);
+bool IntermediateNode<T, arr_size>::set_right_node(const std::shared_ptr<TreeNode<T>> &new_right_node) {
+    right_node = std::dynamic_pointer_cast<TreeNode<T>>(new_right_node);
     return right_node != nullptr && right_node->get_type() == TYPE::INTERMEDIATE;
 }
-
 
 /**
  * @brief Функция превращает промежуточный узел в подстроку
@@ -232,9 +260,18 @@ std::string LeafNode<T, arr_size>::to_string() {
 template<typename T, size_t arr_size>
 bool LeafNode<T, arr_size>::add_element(T element) {
     if (actual_size < arr_size) {
-        data[actual_size++] = element;
-        data[actual_size] = NULL;
-        return true;
+        if constexpr (std::is_same_v<T, char *>) {
+            size_t len = std::strlen(element);
+            std::cout << len << std::endl;
+            data[actual_size] = new char[len + 1];
+            std::strcpy(data[actual_size], element);
+            actual_size++;
+            return true;
+        } else {
+            data[actual_size++] = element;
+            data[actual_size] = NULL;
+            return true;
+        }
     }
     return false;
 }
@@ -280,6 +317,43 @@ bool LeafNode<T, arr_size>::remove_by_index(const int index) {
         }
     }
     data = std::move(temp);
+    return true;
+}
+
+template<typename T, size_t arr_size>
+bool LeafNode<T, arr_size>::insert_by_index(size_t index, T element) {
+    if (index > arr_size || actual_size >= arr_size) {
+        return false;
+    }
+
+    for (size_t i = actual_size; i > index; --i) {
+        data[i] = data[i - 1];
+    }
+
+    data[index] = element;
+
+    ++actual_size;
+    return true;
+}
+
+template<typename T, size_t arr_size>
+bool LeafNode<T, arr_size>::remove_by_index(const size_t index) {
+    if (index > arr_size || actual_size >= arr_size) {
+        throw std::out_of_range("Index out of bounds or leaf is full");
+    }
+
+    for (size_t i = index; i < actual_size - 1; ++i) {
+        data[i] = data[i + 1];
+    }
+    --actual_size;
+    return true;
+}
+
+template<typename T, size_t arr_size>
+bool LeafNode<T, arr_size>::clear_elements() {
+    data = std::make_unique<T[]>(arr_size + 1);
+    actual_size = 0;
+    data[actual_size] = NULL;
     return true;
 }
 
